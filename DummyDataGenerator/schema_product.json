@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "name":  { "type": "string", "format": "product" },
+    "price": { "type": "number", "minimum": 1.0, "maximum": 999.99 },
+    "stock": { "type": "integer", "minimum": 0, "maximum": 500 }
+  }
+}
