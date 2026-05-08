@@ -24,26 +24,16 @@ MSBuild DummyDataGenerator\DummyDataGenerator.vcxproj /p:Configuration=Release /
 ### CLI 모드
 
 ```
-DummyDataGenerator.exe -s <schema.json> -n <count> -o <output.json> [-r]
+DummyDataGenerator.exe -s <schema.json> [-n <count>] [-o <output.json>] [-r]
 ```
 
 | 옵션 | 설명 | 기본값 |
 |------|------|--------|
-| `-s <file>` | 스키마 JSON 파일 경로 **(필수)** | - |
+| `-s <file>` | 스키마 JSON 파일 경로 **(필수)** | — |
 | `-n <count>` | 생성할 레코드 수 | `10` |
 | `-o <file>` | 출력 파일 경로 | `output.json` |
-| `-r` | Raw Array 형식으로 출력 (기본: Repository 형식) | - |
-| `-h` | 도움말 출력 | - |
-
-**예시**
-
-```bash
-# users.json 스키마로 50개 생성
-DummyDataGenerator.exe -s schema_user.json -n 50 -o users.json
-
-# Raw Array 형식으로 생성
-DummyDataGenerator.exe -s schema_product.json -n 20 -o products.json -r
-```
+| `-r` | Raw Array 형식으로 출력 (기본: Repository 형식) | — |
+| `-h` | 도움말 출력 | — |
 
 ### 인터랙티브 메뉴
 
@@ -77,25 +67,26 @@ DummyDataGenerator.exe
 
 ### Repository 형식 (기본 — DataMonitor 호환)
 
-`JsonRepository`가 직접 읽을 수 있는 형식으로 출력합니다.
+`JsonRepository<T>`가 직접 읽을 수 있는 형식으로 출력합니다.
 
 ```json
 {
-  "nextId": 4,
+  "nextId": 6,
   "entities": [
-    { "id": 1, "name": "Alice Johnson", "email": "alice42@gmail.com", "age": 31 },
-    { "id": 2, "name": "Bob Smith",     "email": "bob17@example.com", "age": 45 },
-    { "id": 3, "name": "Eve Williams",  "email": "eve99@yahoo.com",   "age": 27 }
+    { "id": 1, ... },
+    { "id": 2, ... }
   ]
 }
 ```
+
+`id`와 `nextId`는 자동으로 순번 부여되며, 스키마에 선언하지 않아도 됩니다.
 
 ### Raw Array 형식 (`-r` 옵션)
 
 ```json
 [
-  { "name": "Widget Pro", "price": 149.99, "stock": 120 },
-  { "name": "Core Kit",   "price": 39.50,  "stock": 8 }
+  { ... },
+  { ... }
 ]
 ```
 
@@ -103,13 +94,12 @@ DummyDataGenerator.exe
 
 ## JSON Schema 작성법
 
-최상위는 반드시 `type: object`이어야 합니다.  
-`id` 필드는 Repository 형식 출력 시 자동으로 1부터 순번 부여되므로 스키마에 선언하지 않아도 됩니다.
+최상위는 반드시 `"type": "object"` 이어야 합니다.
 
-### 지원 타입
+### 지원 타입 및 키워드
 
-| `type` | 추가 키워드 |
-|--------|-------------|
+| `type` | 사용 가능한 키워드 |
+|--------|-------------------|
 | `object` | `properties` |
 | `array` | `items`, `minItems`, `maxItems` |
 | `string` | `format`, `minLength`, `maxLength`, `enum` |
@@ -117,9 +107,9 @@ DummyDataGenerator.exe
 | `number` | `minimum`, `maximum` |
 | `boolean` | — |
 
-### string format 목록
+### string `format` 목록
 
-| format | 예시 출력 |
+| format | 생성 예시 |
 |--------|-----------|
 | `email` | `alice42@gmail.com` |
 | `name` | `Alice Johnson` |
@@ -130,14 +120,16 @@ DummyDataGenerator.exe
 | `sentence` | `fast blue new alpha bold` |
 | `word` | `swift` |
 
-`format` 없이 `minLength` / `maxLength`만 지정하면 해당 길이의 랜덤 단어를 생성합니다.
+`format` 없이 `minLength` / `maxLength`만 지정하면 해당 길이의 랜덤 단어를 생성합니다.  
+`enum`을 지정하면 목록 중 하나를 랜덤으로 선택합니다.
 
 ---
 
-## 예제 스키마
+## 예제
 
-### schema_user.json
+### 예제 1 — User 스키마 (Repository 형식)
 
+**schema_user.json**
 ```json
 {
   "type": "object",
@@ -149,25 +141,55 @@ DummyDataGenerator.exe
 }
 ```
 
-실행:
+**실행**
 ```
-DummyDataGenerator.exe -s schema_user.json -n 10 -o users.json
+DummyDataGenerator.exe -s schema_user.json -n 5 -o users.json
 ```
 
-출력 (`users.json`):
+**출력 (users.json)**
 ```json
 {
-  "nextId": 11,
   "entities": [
-    { "id": 1, "age": 57, "email": "bob243@webmail.io",   "name": "Olivia Martin" },
-    { "id": 2, "age": 20, "email": "frank991@gmail.com",  "name": "Victor Martinez" },
-    ...
-  ]
+    {
+      "age": 48,
+      "email": "henry521@yahoo.com",
+      "id": 1,
+      "name": "Bob Robinson"
+    },
+    {
+      "age": 39,
+      "email": "diana622@test.org",
+      "id": 2,
+      "name": "Mia Brown"
+    },
+    {
+      "age": 63,
+      "email": "uma425@mail.net",
+      "id": 3,
+      "name": "Bob Robinson"
+    },
+    {
+      "age": 48,
+      "email": "victor650@example.com",
+      "id": 4,
+      "name": "Grace Robinson"
+    },
+    {
+      "age": 33,
+      "email": "zoe978@company.com",
+      "id": 5,
+      "name": "Bob Wilson"
+    }
+  ],
+  "nextId": 6
 }
 ```
 
-### schema_product.json
+---
 
+### 예제 2 — Product 스키마 (Repository 형식)
+
+**schema_product.json**
 ```json
 {
   "type": "object",
@@ -179,15 +201,64 @@ DummyDataGenerator.exe -s schema_user.json -n 10 -o users.json
 }
 ```
 
-### schema_complex.json — 복합 타입 예제
+**실행**
+```
+DummyDataGenerator.exe -s schema_product.json -n 5 -o products.json
+```
 
+**출력 (products.json)**
+```json
+{
+  "entities": [
+    {
+      "id": 1,
+      "name": "Mega Device",
+      "price": 499.64,
+      "stock": 135
+    },
+    {
+      "id": 2,
+      "name": "Pro Series",
+      "price": 408.36,
+      "stock": 293
+    },
+    {
+      "id": 3,
+      "name": "Gadget Plus",
+      "price": 747.33,
+      "stock": 250
+    },
+    {
+      "id": 4,
+      "name": "Widget Pro",
+      "price": 893.71,
+      "stock": 112
+    },
+    {
+      "id": 5,
+      "name": "Power Unit",
+      "price": 763.74,
+      "stock": 450
+    }
+  ],
+  "nextId": 6
+}
+```
+
+---
+
+### 예제 3 — 복합 스키마 (Raw Array 형식)
+
+`boolean`, `enum`, 중첩 `array`, `number` 등 여러 타입을 한 번에 사용하는 예제입니다.
+
+**schema_complex.json**
 ```json
 {
   "type": "object",
   "properties": {
     "username": { "type": "string",  "format": "first-name" },
     "city":     { "type": "string",  "format": "city" },
-    "score":    { "type": "number",  "minimum": 0.0, "maximum": 100.0 },
+    "score":    { "type": "number",  "minimum": 0.0,  "maximum": 100.0 },
     "active":   { "type": "boolean" },
     "level":    { "type": "integer", "minimum": 1, "maximum": 10 },
     "role":     { "type": "string",  "enum": ["admin", "user", "guest"] },
@@ -197,17 +268,51 @@ DummyDataGenerator.exe -s schema_user.json -n 10 -o users.json
 }
 ```
 
-실행:
+**실행**
 ```
-DummyDataGenerator.exe -s schema_complex.json -n 3 -r
+DummyDataGenerator.exe -s schema_complex.json -n 3 -o result.json -r
 ```
 
-출력:
+**출력 (result.json)**
 ```json
 [
-  { "active": false, "city": "Tokyo",   "level": 4, "role": "admin", "score": 11.85, "tags": ["beta"],           "username": "Bob" },
-  { "active": false, "city": "Berlin",  "level": 3, "role": "admin", "score": 93.9,  "tags": ["swift", "new"],  "username": "Eve" },
-  { "active": true,  "city": "Toronto", "level": 1, "role": "user",  "score": 36.66, "tags": ["swift", "blue"], "username": "Iris" }
+  {
+    "active": false,
+    "city": "Rome",
+    "level": 6,
+    "role": "user",
+    "score": 87.35,
+    "tags": [
+      "zeta",
+      "gamma",
+      "bold"
+    ],
+    "username": "Victor"
+  },
+  {
+    "active": false,
+    "city": "Tokyo",
+    "level": 7,
+    "role": "guest",
+    "score": 7.05,
+    "tags": [
+      "swift",
+      "epsilon"
+    ],
+    "username": "Iris"
+  },
+  {
+    "active": false,
+    "city": "Berlin",
+    "level": 9,
+    "role": "user",
+    "score": 89.68,
+    "tags": [
+      "bold",
+      "zeta"
+    ],
+    "username": "Mia"
+  }
 ]
 ```
 
